@@ -1,0 +1,5 @@
+apiVersion: v2
+name: mtap
+description: Helm chart for MTAP deployment
+version: 0.1.0
+appVersion: "1.0"
