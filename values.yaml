@@ -30,6 +30,7 @@ ingress:
     alb.ingress.kubernetes.io/healthcheck-path: /
     alb.ingress.kubernetes.io/healthcheck-port: "80"
     alb.ingress.kubernetes.io/load-balancer-name: mtap-dev-ingress-alb
+    alb.ingress.kubernetes.io/use-existing-alb: "true"
     # Explicitly tell controller not to manage security groups
     alb.ingress.kubernetes.io/manage-backend-security-group-rules: "false"
     # Skip creating listeners since they exist
