@@ -1,0 +1,10 @@
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: {{ .Release.Name }}-tgb
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceRef:
+    name: {{ .Release.Name }}-service
+    port: {{ .Values.service.port }}
+  targetGroupARN: {{ .Values.tgb.targetGroupARN }}
