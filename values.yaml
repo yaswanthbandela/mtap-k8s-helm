@@ -21,7 +21,7 @@ hpa:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 50
 tgb:
-  targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:905418303993:targetgroup/mtap-dev-frontend/28dbe253604ee73b
+  targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:905418303993:targetgroup/mtap-dev-frontend/3f3cb24f4b776796
 
 # ingress:
 #   enabled: false
