@@ -2,9 +2,9 @@ replicaCount: 2
 
 image:
   repository: 905418303993.dkr.ecr.us-east-1.amazonaws.com/mtap-backend
-  tag: latest
+  tag: v2
   pullPolicy: Always
-
+configMap: dev-mtap-configmap
 resources:
   requests:
     cpu: "200m"
