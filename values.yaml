@@ -2,9 +2,9 @@ replicaCount: 2
 
 image:
   repository: 905418303993.dkr.ecr.us-east-1.amazonaws.com/mtap-backend
-  tag: v2
+  tag: v3
   pullPolicy: Always
-  
+
 serviceAccountName: ssm-reader  # ✅ Attach the IAM Role for SSM Access
 ssmSecretName: aws-ssm  # ✅ Name of the SSM secret being injected
 secretProviderClass: aws-ssm-provider
