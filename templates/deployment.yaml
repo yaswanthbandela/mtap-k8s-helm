@@ -15,6 +15,7 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+      serviceAccountName: {{ .Values.serviceAccountName }}  # ✅ IAM Role for Service Account (IRSA)
       containers:
       - name: {{ .Release.Name }}-container
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -27,6 +28,40 @@ spec:
           limits:
             cpu: {{ .Values.resources.limits.cpu }}
             memory: {{ .Values.resources.limits.memory }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.configMap }}
+        env:
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.ssmSecretName }}
+              key: MYSQL_DATABASE
+        - name: MYSQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.ssmSecretName }}
+              key: MYSQL_USERNAME
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.ssmSecretName }}
+              key: MYSQL_PASSWORD
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.ssmSecretName }}
+              key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.ssmSecretName }}
+              key: MYSQL_PORT
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.secretProviderClass }}

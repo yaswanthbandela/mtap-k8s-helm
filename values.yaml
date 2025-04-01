@@ -4,7 +4,11 @@ image:
   repository: 905418303993.dkr.ecr.us-east-1.amazonaws.com/mtap-backend
   tag: v2
   pullPolicy: Always
-configMap: dev-mtap-configmap
+  
+serviceAccountName: ssm-reader  # ✅ Attach the IAM Role for SSM Access
+ssmSecretName: aws-ssm  # ✅ Name of the SSM secret being injected
+secretProviderClass: aws-ssm-provider
+
 resources:
   requests:
     cpu: "200m"
