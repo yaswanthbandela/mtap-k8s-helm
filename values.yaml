@@ -6,8 +6,8 @@ image:
   pullPolicy: Always
 
 serviceAccountName: ssm-reader  # ✅ Attach the IAM Role for SSM Access
-ssmSecretName: aws-ssm  # ✅ Name of the SSM secret being injected
-secretProviderClass: aws-ssm-provider
+secretProviderClass: "aws-ssm-provider"
+ssmSecretName: "aws-ssm"
 
 resources:
   requests:
