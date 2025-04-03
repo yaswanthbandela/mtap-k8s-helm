@@ -5,9 +5,9 @@ image:
   tag: v3
   pullPolicy: Always
 
-serviceAccountName: "ssm-reader" # ✅ Attach the IAM Role for SSM Access
-secretProviderClass: "aws-ssm-provider"
-ssmSecretName: "aws-ssm"
+serviceAccountName: ssm-reader
+secretProviderClass: aws-ssm-provider
+ssmSecretName: aws-ssm
 
 resources:
   requests:
@@ -25,7 +25,7 @@ hpa:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 50
 tgb:
-  targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:905418303993:targetgroup/mtap-dev-frontend/51bbf3ded45c2d00
+  targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:905418303993:targetgroup/mtap-dev-frontend/5e3080390aa35bdc
 
 # ingress:
 #   enabled: false
