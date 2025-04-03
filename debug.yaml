@@ -1,0 +1,185 @@
+---
+# Source: mtap/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mtap-service
+  namespace: development
+  labels:
+    app: mtap
+spec:
+  selector:
+    app: mtap
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+# Source: mtap/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mtap-deployment
+  namespace: development
+  labels:
+    app: mtap
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mtap
+  template:
+    metadata:
+      labels:
+        app: mtap
+    spec:
+      serviceAccountName: ssm-reader  # ✅ IAM Role for Service Account (IRSA)
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: aws-ssm-provider      
+      containers:
+      - name: mtap-container
+        image: "905418303993.dkr.ecr.us-east-1.amazonaws.com/mtap-backend:v3"
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        env:
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: aws-ssm
+              key: MYSQL_DATABASE
+        - name: MYSQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: aws-ssm
+              key: MYSQL_USERNAME
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: aws-ssm
+              key: MYSQL_PASSWORD
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: aws-ssm
+              key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            secretKeyRef:
+              name: aws-ssm
+              key: MYSQL_PORT
+        - name: S3ACCESSKEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-ssm
+              key: S3ACCESSKEY
+        - name: S3SECRETKEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-ssm
+              key: S3SECRETKEY
+        - name: DRUPAL_ENV
+          valueFrom:
+            secretKeyRef:
+              name: aws-ssm
+              key: DRUPAL_ENV
+
+        volumeMounts:
+        - name: secrets-store
+          mountPath: /mnt/secrets-store
+          readOnly: true
+---
+# Source: mtap/templates/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mtap-hpa
+  namespace: development
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mtap-deployment
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+---
+# Source: mtap/templates/secret-provider.yaml
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: aws-ssm-provider
+  namespace: development
+spec:
+  provider: aws
+  parameters:
+    objects: |
+      - objectName: "mtap/dev/mysql"
+        objectType: "secretsmanager"
+        jmesPath:
+          - path: MYSQL_DATABASE
+            objectAlias: MYSQL_DATABASE
+          - path: MYSQL_USERNAME
+            objectAlias: MYSQL_USERNAME
+          - path: MYSQL_PASSWORD
+            objectAlias: MYSQL_PASSWORD
+          - path: MYSQL_HOST
+            objectAlias: MYSQL_HOST
+          - path: MYSQL_PORT
+            objectAlias: MYSQL_PORT
+          - path: S3ACCESSKEY
+            objectAlias: S3ACCESSKEY
+          - path: S3SECRETKEY
+            objectAlias: S3SECRETKEY
+          - path: DRUPAL_ENV
+            objectAlias: DRUPAL_ENV
+  secretObjects:
+    - secretName: aws-ssm
+      type: Opaque
+      data:
+        - objectName: MYSQL_DATABASE
+          key: MYSQL_DATABASE
+        - objectName: MYSQL_USERNAME
+          key: MYSQL_USERNAME
+        - objectName: MYSQL_PASSWORD
+          key: MYSQL_PASSWORD
+        - objectName: MYSQL_HOST
+          key: MYSQL_HOST
+        - objectName: MYSQL_PORT
+          key: MYSQL_PORT
+        - objectName: S3ACCESSKEY
+          key: S3ACCESSKEY
+        - objectName: S3SECRETKEY
+          key: S3SECRETKEY
+        - objectName: DRUPAL_ENV
+          key: DRUPAL_ENV
+---
+# Source: mtap/templates/target-group-binding.yaml
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: mtap-tgb
+  namespace: development
+spec:
+  serviceRef:
+    name: mtap-service
+    port: 80
+  targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:905418303993:targetgroup/mtap-dev-frontend/5e3080390aa35bdc

@@ -1,0 +1,4 @@
+.git/
+.gitignore
+debug.yaml
+db_23_Jan_2025.sql.gz
