@@ -16,6 +16,13 @@ spec:
         app: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Values.serviceAccountName }}  # ✅ IAM Role for Service Account (IRSA)
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.secretProviderClass }}      
       containers:
       - name: {{ .Release.Name }}-container
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -72,12 +79,6 @@ spec:
 
         volumeMounts:
         - name: secrets-store
-          mountPath: "/mnt/secrets-store"
+          mountPath: /mnt/secrets-store
           readOnly: true
-      volumes:
-      - name: secrets-store
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: {{ .Values.secretProviderClass }}
+
