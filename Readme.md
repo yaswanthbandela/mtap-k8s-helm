@@ -161,7 +161,7 @@ aws secretsmanager create-secret \
 
 ```bash
 # Deploy your application using Helm
-helm install mtap ./mtap-k8s-helm -f values.yaml -n development
+helm install mtap ./mtap-k8s-helm  -n development
 ```
 
 ## Step 9: Verify Everything is Working
