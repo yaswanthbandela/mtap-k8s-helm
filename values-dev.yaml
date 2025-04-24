@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: 905418303993.dkr.ecr.us-east-1.amazonaws.com/mtap-backend

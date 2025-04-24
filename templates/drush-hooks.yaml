@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-post-upgrade
+  annotations:
+    "helm.sh/hook": post-upgrade,post-install
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: {{ .Values.serviceAccountName }}  # ✅ IRSA support
+      restartPolicy: Never
+
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Values.secretProviderClass }}
+
+      containers:
+        - name: drush-commands
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+
+          # 🔐 Auto-populate all environment variables from secretKeys
+          env:
+          {{- range .Values.secretKeys }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.ssmSecretName }}
+                  key: {{ . }}
+          {{- end }}
+
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              cd /var/www/html && \
+              vendor/bin/drush updb -y && \
+              vendor/bin/drush cim -y && \
+              vendor/bin/drush ib -y && \
+              vendor/bin/drush cr

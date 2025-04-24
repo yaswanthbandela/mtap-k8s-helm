@@ -36,49 +36,14 @@ spec:
             cpu: {{ .Values.resources.limits.cpu }}
             memory: {{ .Values.resources.limits.memory }}
         env:
-        - name: MYSQL_DATABASE
+        {{- range .Values.secretKeys }}
+        - name: {{ . }}
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.ssmSecretName }}
-              key: MYSQL_DATABASE
-        - name: MYSQL_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.ssmSecretName }}
-              key: MYSQL_USERNAME
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.ssmSecretName }}
-              key: MYSQL_PASSWORD
-        - name: MYSQL_HOST
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.ssmSecretName }}
-              key: MYSQL_HOST
-        - name: MYSQL_PORT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.ssmSecretName }}
-              key: MYSQL_PORT
-        - name: S3ACCESSKEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.ssmSecretName }}
-              key: S3ACCESSKEY
-        - name: S3SECRETKEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.ssmSecretName }}
-              key: S3SECRETKEY
-        - name: DRUPAL_ENV
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.ssmSecretName }}
-              key: DRUPAL_ENV
-
+              name: {{ $.Values.ssmSecretName }}
+              key: {{ . }}
+        {{- end }}
         volumeMounts:
         - name: secrets-store
           mountPath: /mnt/secrets-store
           readOnly: true
-
