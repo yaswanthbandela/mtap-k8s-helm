@@ -137,7 +137,7 @@ eksctl create iamserviceaccount \
     --cluster YOUR_CLUSTER_NAME \
     --attach-policy-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):policy/mtap-ssm-reader-policy \
     --approve \
-    --override-existing-serviceaccounts
+    --override-existing-serviceaccounts --region us-east-1
 ```
 
 ## Step 7: Create your Secret in AWS Secrets Manager
