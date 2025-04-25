@@ -41,7 +41,7 @@ kubectl get nodes
 aws eks describe-cluster --name YOUR_CLUSTER_NAME --query "cluster.identity.oidc.issuer" --output text
 
 # Set up OIDC provider if not already configured
-eksctl utils associate-iam-oidc-provider --cluster YOUR_CLUSTER_NAME --approve
+eksctl utils associate-iam-oidc-provider --cluster YOUR_CLUSTER_NAME --approve --region us-east-1
 ```
 
 ## Step 4: Install AWS Load Balancer Controller
